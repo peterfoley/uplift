@@ -6,7 +6,7 @@ Description: An integrated package for building and testing uplift models
 Author: Leo Guelman
 Maintainer: Leo Guelman <leo.guelman@gmail.com>
 License: GPL-2 | GPL-3
-Depends: R (>= 3.0.0), RItools, MASS, coin, tables, penalized
+Depends: R (>= 3.0.0), RItools, MASS, coin, tables, penalized, parallel
 Repository: CRAN
 Packaged: 2014-03-17 19:21:58 UTC; lguelman
 NeedsCompilation: no

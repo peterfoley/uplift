@@ -127,31 +127,36 @@
   if (verbose)
     cat("upliftRF: starting.",date(),"\n")
   
-  for (i in 1:ntree) {  
-    
+  tree_res <- parallel::mclapply(1:ntree, function(i) {
     if (verbose)
       if ((i %% 10) == 0 && i < ntree) message( "", i, " out of ", ntree, " trees so far...")    
-      
+    
     b.ind <- lapply(1:split_len, function(k) sample(1:nrow(dframe_sp[[k]]),
                                                     nr_in_samples_sp[[k]], replace = FALSE))
     dframe_sp_s <- lapply(1:split_len, function(k) dframe_sp[[k]][b.ind[[k]], ])
     b.dframe <- do.call("rbind", dframe_sp_s)
     
-    trees[[i]] <- buildTree(b.dframe, 
-                            mtry, 
-                            split_method,
-                            interaction.depth,
-                            minsplit, 
-                            minbucket_ct0, 
-                            minbucket_ct1, 
-                            nr_vars,
-                            nr_in_samples,
-                            nr_nodes);
+    tree <- buildTree(b.dframe, 
+                      mtry, 
+                      split_method,
+                      interaction.depth,
+                      minsplit, 
+                      minbucket_ct0, 
+                      minbucket_ct1, 
+                      nr_vars,
+                      nr_in_samples,
+                      nr_nodes);
     
-    if (keep.inbag) 
-      b.ind.m[, i] <- b.dframe$obs.index
-  }     
-  
+    b.ind.m_column <- if (keep.inbag) b.dframe$obs.index
+    
+    list(tree=tree,
+         b.ind.m_column=b.ind.m_column)
+  })
+  # unpack the parallel results
+  trees <- lapply(tree_res, `[[`, 'tree') 
+  if (keep.inbag) {
+    b.ind.m <- do.call(cbind, lapply(tree_res, `[[`, 'b.ind.m_column') )
+  }
   
   cl <- match.call()
   var.names <- colnames(x)
